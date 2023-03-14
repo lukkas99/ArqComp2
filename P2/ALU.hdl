@@ -1,0 +1,71 @@
+/**
+ * A ULA (Unidade Lógica e Artimética).
+ * Calcula uma das seguintes funções:
+ * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
+ * x+1, y+1, x-1, y-1, x&y, x|y em duas entradas de 16 bits,
+ * de acordo com 6 bits de entrada denotados por zx,nx,zy,ny,f,no.
+ * Além disso, a ULA calcula duas saídas de 1-bit:
+ * se a saída da ULA == 0, zr é setado para 1; caso contrário zr é setado para 0;
+ * se a saída da ULA < 0, ng é setado para 1; caso contrário ng é setado para 0.
+ */
+
+// Implementação: a lógica da ULA manipula as entradas x e y
+// e opera nos valores resultantes, como segue:
+// if (zx == 1) set x = 0        // constante de 16 bits
+// if (nx == 1) set x = !x       // not bit a bit
+// if (zy == 1) set y = 0        // constante de 16 bits
+// if (ny == 1) set y = !y       // not bit a bit
+// if (f == 1)  set out = x + y  // adição inteira em complemento de 2
+// if (f == 0)  set out = x & y  // and bit a bit
+// if (no == 1) set out = !out   // not bit a bit
+// if (out == 0) set zr = 1
+// if (out < 0) set ng = 1
+
+CHIP ALU {
+    IN
+        x[16], y[16],  // entradas de 16 bits
+        zx, // zera a entrada x?
+        nx, // nega a entrada x?
+        zy, // zera a entrada y?
+        ny, // nega a entrada y?
+        f,  // calcula out = x + y (if 1) or x & y (if 0)
+        no; // nega a saída out?
+
+    OUT
+        out[16], // saída de 16 bits
+        zr, // 1 if (out == 0), 0 caso contrário
+        ng; // 1 if (out < 0),  0 caso contrário
+
+    PARTS:
+    // Implemente aqui:
+    // zerar entrada x se zx = 1
+    Mux16(a=x, b=false, sel=zx, out=x_zeroed);
+
+    // negar entrada x se nx = 1
+    Not16(in=x_zeroed, out=not_x);
+    Mux16(a=x_zeroed, b=not_x, sel=nx, out=x_negated);
+
+    // zerar entrada y se zy = 1
+    Mux16(a=y, b=false, sel=zy, out=y_zeroed);
+
+    // negar entrada y se ny = 1
+    Not16(in=y_zeroed, out=not_y);
+    Mux16(a=y_zeroed, b=not_y, sel=ny, out=y_negated);
+
+    // somar x e y se f = 1, fazer x AND y se f = 0
+    Add16(a=x_negated, b=y_negated, out=add_out);
+    And16(a=x_negated, b=y_negated, out=and_out);
+    Mux16(a=and_out, b=add_out, sel=f, out=sum);
+
+    // negar a saída out se no = 1
+    Not16(in=sum, out=not_sum);
+    Mux16(a=sum, b=not_sum, sel=no, out=out);
+
+    // verificar se a saída é zero e setar zr em conformidade
+    Or8Way(in=out[0..7], out=or_8way_1);
+    Or8Way(in=out[8..15], out=or_8way_2);
+    Or(a=or_8way_1, b=or_8way_2, out=zr);
+
+    // verificar se a saída é negativa e setar ng em conformidade
+    Not(in=out[15], out=ng);
+}
