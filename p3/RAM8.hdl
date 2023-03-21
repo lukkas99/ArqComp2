@@ -1,0 +1,17 @@
+// Coloque o seu nome aqui:
+
+/**
+ * Memória de 8 registradores, cada um com 16 bits de largura.
+ * A saída out reflete o valor armazenado no endereço de memória
+ * especificado em adress. If load ==1, then o valor in é armazenado (loaded)
+ * no endereço de memória especificado em adress (o valor carregado será
+ * refletido na saída out a partir do próximo passo de tempo em diante).
+ */
+
+CHIP RAM8 {
+    IN in[16], load, address[3];
+    OUT out[16];
+
+    PARTS:
+    // Coloque o seu código aqui:
+}
