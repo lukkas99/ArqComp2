@@ -1,18 +1,42 @@
 main:
+#iniciar variaveis
+li t0, 0   # impares
+li t1, 0   # pares
 
-addi t0, zero, 4 # escolhe a operacao de leitura de inteiro (4)
+loop:
+# le um inteiro do teclado (4)
+addi t0, zero, 4 
 ecall
-beq a0, zero, ezero
-andi s0, a0, 1 
-beq s0, zero, ehpar
-addi s2, s2, a0
-j sub
-ehpar:
-addi s1, s1, a0
-j sub 
-sub:
-sub a0, s2, s1 
-addi t0, zero, 1 # escolhe a operação de escrita de inteiro (1)
+
+#Verificar se o numero = zero
+beqz a0, end_program
+
+# Verificar se o numero = par ou impar
+andi t2, a0, 1   # Verificar o bit menos significativo
+
+# adicionar o numero a soma apropriada
+beqz t2, add_even   # Se for par, pular para add_even
+add t1, t1, a0     # Se for impar, adicionar ao somatorio de impares
+j continue
+        
+add_even:
+add t0, t0, a0     # Se for par, adicionar ao somatorio de pares
+        
+continue:
+j read_loop
+        
+end_program:
+# calcular o resultado final
+sub t3, t1, t0
+        
+# imprimir o resultado final
+la a0, resultPrompt
+li a7, 4
 ecall
-ezero:
+
+#imprimir   
+addi a0, zero, t3 
+addi t0, zero, 1
+ecall
+        
 ret
