@@ -1,0 +1,8 @@
+Implementar em assembly do rics-v as funções:
+
+1) int cmp (const char *str1, const char *str2)
+- se forem iguais, retorna 0
+- se nao retornar o valor != 0
+
+2) char *strcat( char *destination, const char *source)
+- a função strcpy pode ajudar
